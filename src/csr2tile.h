@@ -476,3 +476,17 @@ void csr2tile_col_major(SMatrix *matrix)
         free(num);
     }
 }
+
+
+void matrix_destroy(SMatrix *matrix)
+{
+    free(matrix->tile_ptr);
+    free(matrix->tile_columnidx);
+    free(matrix->tile_nnz);
+    free(matrix->tile_csr_Value);
+    free(matrix->tile_csr_Col);
+    free(matrix->tile_csr_Ptr);
+    free(matrix->mask);
+
+
+}

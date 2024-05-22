@@ -127,6 +127,7 @@ int main(int argc, char ** argv)
         matrixB->columnindex = cscRowIdxA;
         matrixB->value    = cscValA;
 
+
     }
     else
     {
@@ -176,6 +177,7 @@ printf("tile space overhead = %.2f MB\n", mem);
 #endif
 
         csr2tile_col_major(matrixB);
+
 
         int blk_intersec_bitmask_len = ceil((double)matrixA->tilen / 32.0);
         double densityA = (double)matrixA->numtile / ((double)matrixA->tilem*(double)matrixA->tilen);
@@ -274,7 +276,8 @@ printf("tile space overhead = %.2f MB\n", mem);
                 filename, matrixA->m, matrixA->n, matrixA->nnz, nnzCub, nnzC_computed, compression_rate, time_step1, time_step2,time_step3,time_malloc);
     fclose(fout_time);
     
-    
+
+#if SPACE
     // write memory space of CSR and tile format to text (scv) file
     FILE *fout_mem = fopen("../data/mem-cost.csv", "a");
     if (fout_mem == NULL)
@@ -283,7 +286,11 @@ printf("tile space overhead = %.2f MB\n", mem);
                 filename, matrixA->m, matrixA->n, matrixA->nnz, nnzCub, nnzC_computed, compression_rate, csr_mem,mem);
     fclose(fout_mem);
 
-    // write memory space of CSR and tile format to text (scv) file
+#endif
+
+#if TIMING
+
+    // write preprocessing overhead of CSR and tile format to text (scv) file
     FILE *fout_pre = fopen("../data/preprocessing.csv", "a");
     if (fout_pre == NULL)
         printf("Writing results fails.\n");
@@ -291,28 +298,7 @@ printf("tile space overhead = %.2f MB\n", mem);
                     filename, matrixA->m, matrixA->n, matrixA->nnz, nnzCub, nnzC_computed, compression_rate, time_conversion,time_tile);
     fclose(fout_pre);
     
-
-
-    free(matrixA->tile_ptr);
-    free(matrixA->tile_columnidx);
-    free(matrixA->tile_nnz);
-    free(matrixA->tile_csr_Value);
-    free(matrixA->tile_csr_Col);
-    free(matrixA->tile_csr_Ptr);
-    free(matrixA->mask);
-
-    free(matrixB->csc_tile_ptr);
-    free(matrixB->csc_tile_rowidx);
-    free(matrixB->tile_nnz);
-    free(matrixB->tile_csr_Value);
-    free(matrixB->tile_csr_Col);
-    free(matrixB->tile_csr_Ptr);
-    free(matrixB->mask);
-
-
-
-
-
+#endif
 
 
 #endif
@@ -342,11 +328,13 @@ tile2csr(matrixC);
               check_result, nnzCub, &nnzC, &compression_rate1, &time_cusparse, &gflops_cusparse);
     printf("---------------------------------------------------------------\n");
 
-
-
-
 #endif
+    matrix_destroy(matrixA);
+    matrix_destroy(matrixB);
 
+    free(matrixA->rowpointer);
+    free(matrixA->columnindex);
+    free(matrixA->value);
 
     return 0;
 
